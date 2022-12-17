@@ -6,3 +6,4 @@ dataset/Glucose Level - T1D - FreeStyle Libre.csv
 dataset/generado/dfGen.dataset
 dataset/generado/dataset15min/*
 dataset/generado/dataset30min/*
+.ipynb_checkpoints/*
