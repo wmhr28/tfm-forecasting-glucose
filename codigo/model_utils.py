@@ -5,7 +5,7 @@ import codigo
 from codigo import utils
 from sklearn import metrics
 
-def GenDataSet(df,features,pacientesId,min,train_share,val_share,lag,n_ahead,scalerHours,scalerMin,scalerGlucosa,scalerPodId,scalerLevelId,fillNullData=True): 
+def GenDataSet(df,features,pacientesId,min,train_share,val_share,lag,n_ahead,scalerHours,scalerMin,scalerGlucosa,scalerPodId,scalerLevelId,fillNullData=True,resample=True): 
     
     dfCopy = df.copy()
 
@@ -23,37 +23,45 @@ def GenDataSet(df,features,pacientesId,min,train_share,val_share,lag,n_ahead,sca
     strMin=str(min)+'min'
     
     for pacienteID in pacientesId: 
-        data=utils.getDataPatient(dfCopy,pacienteID,strMin,False)
-
+        data=utils.getDataPatient(dfCopy,pacienteID,strMin,False,False,resample)
         data['level_label'] = data['Glucose level'].apply(utils.label_LevelBG)         
         data['level_id'] = data['level_label'].apply(utils.id_LevelBG)        
         data['level_id'] = scalerLevelId.transform(data[['level_id']].values)
         data['Glucose level'] = scalerGlucosa.transform(data[['Glucose level']].values) 
         if(fillNullData):
             data=utils.fillNullData(data,'interpolate_linear')
+        else:
+            data=utils.fillNullData(data,'-1')
 
         data=utils.generateNewColumns(data,scalerHours,scalerMin)
         data['pod_id'] = scalerPodId.transform(data[['pod_id']].values)  
-
-        select_data=data[features].to_numpy()
         
-        if(len(data['Glucose level'])>=lag):
-            X, Y = create_X_Y(select_data, lag=lag, n_ahead=n_ahead)
-            
-            Xtrain, Ytrain = X[0:int(X.shape[0] * train_share)], Y[0:int(X.shape[0] * train_share)]
-            Xval, Yval = X[int(X.shape[0] * train_share):int(X.shape[0] * val_share)], Y[int(X.shape[0] * train_share):int(X.shape[0] * val_share)]
-            Xtest, Ytest = X[int(X.shape[0] * val_share):], Y[int(X.shape[0] * val_share):]
-
+        #data['hour'] = np.where(data['Glucose level'] == -1, -1, data['hour'])
+        #data['pod_id'] = np.where(data['Glucose level'] == -1, -1, data['pod_id'])
+        #data['level_id'] = np.where(data['Glucose level'] == -1, -1, data['level_id'])
+        #data['min'] = np.where(data['Glucose level'] == -1, -1, data['min'])
+      
+        select_data=data[features].to_numpy()        
+        
+        X, Y = create_X_Y(select_data, lag=lag, n_ahead=n_ahead)
+        
+        Xtrain, Ytrain = X[0:int(X.shape[0] * train_share)], Y[0:int(X.shape[0] * train_share)]
+        Xval, Yval = X[int(X.shape[0] * train_share):int(X.shape[0] * val_share)], Y[int(X.shape[0] * train_share):int(X.shape[0] * val_share)]
+        Xtest, Ytest = X[int(X.shape[0] * val_share):], Y[int(X.shape[0] * val_share):]
+        
+        if(len(Xtrain)>0):
             array_Xtrain=np.concatenate((array_Xtrain, Xtrain))
             array_Ytrain=np.concatenate((array_Ytrain, Ytrain))
 
+        if(len(Xval)>0):
             array_Xval=np.concatenate((array_Xval, Xval))
             array_Yval=np.concatenate((array_Yval, Yval))
 
+        if(len(Xtest)>0):
             array_Xtest=np.concatenate((array_Xtest, Xtest))
             array_Ytest=np.concatenate((array_Ytest, Ytest))
 
-            dfGen = pd.concat([dfGen, data[features]])
+        dfGen = pd.concat([dfGen, data[features]])
     
     return dfGen,array_Xtrain,array_Ytrain,array_Xval,array_Yval,array_Xtest,array_Ytest
 
@@ -69,11 +77,8 @@ def create_X_Y(ts: np.array, lag=1, n_ahead=1, target_index=0) -> tuple:
     
     # Creating placeholder lists
     X, Y = [], []
-
-    if len(ts) - lag <= 0:
-        X.append(ts)
-    else:
-        for i in range(len(ts) - lag - n_ahead):
+    if len(ts)+1 - lag -n_ahead >= 0:
+        for i in range(len(ts)+1 - lag - n_ahead):
             Y.append(ts[(i + lag):(i + lag + n_ahead), target_index])
             X.append(ts[i:(i + lag)])
 
