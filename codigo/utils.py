@@ -18,6 +18,7 @@ def getDataPatient(df,id,frequency='15min',includeID=False,includeDate=False,res
         ret['Date']=ret.index
     
     return ret
+    
 def setMasking(x,glucose):
     if(glucose==-1):
         return -1
@@ -25,26 +26,28 @@ def setMasking(x,glucose):
         return x
 
 
-def generateNewColumns(df,scalerHours,scalerMin):
-    ret = df.copy()
-    ret['Gt']=ret['Glucose level'].shift(1)
-    ret['Gt+r']=ret['Glucose level']
-    ret['Yt']=ret['Gt+r']-ret['Gt']
-    ret['Gt'][0]=0
-    ret['Yt'][0]=0
- 
+def generateNewColumns(df,scalerLevelId,scalerHours,scalerMin,scalerPodId,scalerGlucose,normalized=True):
+    ret = df.copy() 
+    
+    ret['level_label'] = ret['Glucose level'].apply(label_LevelBG)         
+    ret['level_id'] = ret['level_label'].apply(id_LevelBG)      
+    
     ret['hour']=ret.index.hour
     
+    ret['min']=ret.index.minute        
+    
     ret['pod_label'] = ret['hour'].apply(label_partOfDay)
-    ret['pod_id'] = ret['pod_label'].apply(id_partOfDay)
+    ret['pod_id'] = ret['pod_label'].apply(id_partOfDay)    
 
-    ret['hour'] = scalerHours.transform(ret[['hour']].values)
-    
-    ret['min']=ret.index.minute    
-    ret['min'] = scalerMin.transform(ret[['min']].values)    
-    
+    if(normalized):
+        ret['level_id'] = scalerLevelId.transform(ret[['level_id']].values)
+        ret['hour'] = scalerHours.transform(ret[['hour']].values)
+        ret['min'] = scalerMin.transform(ret[['min']].values)    
+        ret['pod_id'] = scalerPodId.transform(ret[['pod_id']].values)      
+        ret['Glucose level'] = scalerGlucose.transform(ret[['Glucose level']].values)  
         
     return ret
+
 def transformScaler(x,scaler):
     return scaler.transform([[x]])[0][0]
 

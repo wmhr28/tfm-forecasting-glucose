@@ -5,7 +5,7 @@ import codigo
 from codigo import utils
 from sklearn import metrics
 
-def GenDataSet(df,features,pacientesId,min,train_share,val_share,lag,n_ahead,scalerHours,scalerMin,scalerGlucosa,scalerPodId,scalerLevelId,fillNullData=True,resample=True): 
+def GenDataSet(df,features,pacientesId,min,train_share,val_share,lag,n_ahead,scalerHours,scalerMin,scalerGlucose,scalerPodId,scalerLevelId,fillNullData=True,resample=True,normalized=True): 
     
     dfCopy = df.copy()
 
@@ -24,23 +24,13 @@ def GenDataSet(df,features,pacientesId,min,train_share,val_share,lag,n_ahead,sca
     
     for pacienteID in pacientesId: 
         data=utils.getDataPatient(dfCopy,pacienteID,strMin,False,False,resample)
-        data['level_label'] = data['Glucose level'].apply(utils.label_LevelBG)         
-        data['level_id'] = data['level_label'].apply(utils.id_LevelBG)        
-        data['level_id'] = scalerLevelId.transform(data[['level_id']].values)
-        data['Glucose level'] = scalerGlucosa.transform(data[['Glucose level']].values) 
         if(fillNullData):
             data=utils.fillNullData(data,'interpolate_linear')
         else:
             data=utils.fillNullData(data,'-1')
 
-        data=utils.generateNewColumns(data,scalerHours,scalerMin)
-        data['pod_id'] = scalerPodId.transform(data[['pod_id']].values)  
+        data=utils.generateNewColumns(data,scalerLevelId,scalerHours,scalerMin,scalerPodId,scalerGlucose,normalized)
         
-        #data['hour'] = np.where(data['Glucose level'] == -1, -1, data['hour'])
-        #data['pod_id'] = np.where(data['Glucose level'] == -1, -1, data['pod_id'])
-        #data['level_id'] = np.where(data['Glucose level'] == -1, -1, data['level_id'])
-        #data['min'] = np.where(data['Glucose level'] == -1, -1, data['min'])
-      
         select_data=data[features].to_numpy()        
         
         X, Y = create_X_Y(select_data, lag=lag, n_ahead=n_ahead)
