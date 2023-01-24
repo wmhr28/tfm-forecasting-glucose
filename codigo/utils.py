@@ -83,70 +83,68 @@ def label_partOfDay(x):
     
 def id_partOfDay(x):    
     if (x=='Early Morning'):
-        resp= 1;
+        resp= 1
     elif (x=='Morning'):
-        resp= 2;
+        resp= 2
     elif (x=='Noon'):
-        resp= 3;
+        resp= 3
     elif (x=='Eve'):
-        resp= 4;
+        resp= 4
     elif (x=='Night'):
-        resp= 5;
+        resp= 5
     elif (x=='Late Night'):
-        resp= 6;
-    return resp;
+        resp= 6
+    return resp
 
 def id_partOfDay_inverse_transform(x,scaler):   
     x=int(inverse_transformScaler(x,scaler))
     
     if (x==1):
-        return 'Early Morning';
+        return 'Early Morning'
     elif (x==2):
-        return 'Morning';
+        return 'Morning'
     elif (x==3):
-        return 'Noon';
+        return 'Noon'
     elif (x==4):
-        return 'Eve';
+        return 'Eve'
     elif (x==5):
-        return 'Night';
+        return 'Night'
     elif (x==6):
-        return 'Late Night';
+        return 'Late Night'
 		
 def label_LevelBG(x):
-    ## target range (e.g., 70–180 mg/ dL)
     if  (x <= 70):
-        resp= 'hypoglycemia'
-    elif (x >= 180 ):
-        resp= 'hyperglycemia'
-    else: 
-        resp= 'euglycemia'
-    return resp;
+        return 'hypoglycemia'
+    if (x >= 180 ):
+        return 'hyperglycemia'
+        
+    return 'euglycemia'
     
 def id_LevelBG(x):
     if (x=='hypoglycemia'):
-        resp= -1;
+        resp= -1
     elif (x=='hyperglycemia'):
-        resp= 1;
+        resp= 1
     elif (x=='euglycemia'):
-        resp= 0;
-    return resp;
+        resp= 0
+    return resp
 
 def id_LevelBG_transform(x):
     if (x==-1):
-        return 'hypoglycemia';
+        return 'hypoglycemia'
     elif (x==1):
-        return 'hyperglycemia';
+        return 'hyperglycemia'
     elif (x==0):
-        return 'euglycemia';
+        return 'euglycemia'
 
 def id_LevelBG_inverse_transform(x,scaler):
     x=int(inverse_transformScaler(x,scaler))
     if (x==-1):
-        return 'hypoglycemia';
+        return 'hypoglycemia'
     elif (x==1):
-        return 'hyperglycemia';
+        return 'hyperglycemia'
     elif (x==0):
-        return 'euglycemia';
+        return 'euglycemia'
         
 def plotRangeDates(df,ObjRangeDateStart,ObjRangeDateEnd):
     df.loc[ObjRangeDateStart:ObjRangeDateEnd].plot(figsize=(20, 10))
