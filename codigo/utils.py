@@ -113,11 +113,11 @@ def id_partOfDay_inverse_transform(x,scaler):
         return 'Late Night'
 		
 def label_LevelBG(x):
-    if  (x <= 70):
+    if  (x < 70):
         return 'hypoglycemia'
-    if (x >= 180 ):
+    if (x > 180 ):
         return 'hyperglycemia'
-        
+
     return 'euglycemia'
     
 def id_LevelBG(x):
