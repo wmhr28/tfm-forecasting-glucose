@@ -161,6 +161,25 @@ def genDataset(df,pacientesId,min,includeID,includeDate):
         data=getDataPatient(dfCopy,pacienteID,strMin,includeID,includeDate)        
         dfGen = pd.concat([dfGen, data])
     return dfGen
+
+def plotDayPatient(df,title,plt,date):
+    
+    plt.figure(figsize=(10, 5), dpi=150)
+    plt.axhline(y=69, color='black', linestyle=':')
+    plt.axhline(y=181, color='black', linestyle=':')
+    eventosFijos=[' 04:00:00',' 08:00:00',' 13:30:00',' 19:00:00',' 23:00:00']
+    for evento in eventosFijos: 
+        plt.axvline(pd.Timestamp(date+evento), color='black', linestyle=':') 
+    
+    df['Glucose level'].plot()
+
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(md.HourLocator(interval = 1))
+    ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M:%S'))
+    plt.title(title)    
+    plt.legend()
+    plt.show()
+
 def plotDayAllPatients(df,pacientesId,title,plt,date):
     dfCopy = df.copy()    
     
