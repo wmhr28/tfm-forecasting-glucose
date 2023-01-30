@@ -256,12 +256,8 @@ def downsamplingByLabel(X,Y,Y_label,percent,obj_label,debug=False,minLen=0):
                         if(debug):
                             print('NO')  
                 else:
-                    if(debug):
-                        print('FUERA DE RANGO')
-                        index=0      
+                    return X, Y,Y_label
         else:
-            if(debug):
-                print('FUERA DE RANGO')
-                index=0
+            return X, Y,Y_label
 
     return X, Y,Y_label
