@@ -34,7 +34,7 @@ def GenDataSet(df,features,pacientesId,min,train_share,val_share,lag,n_ahead,sca
         select_data=data[features].to_numpy()        
         
         X, Y = create_X_Y(select_data, lag=lag, n_ahead=n_ahead)
-        
+                
         Xtrain, Ytrain = X[0:int(X.shape[0] * train_share)], Y[0:int(X.shape[0] * train_share)]
         Xval, Yval = X[int(X.shape[0] * train_share):int(X.shape[0] * val_share)], Y[int(X.shape[0] * train_share):int(X.shape[0] * val_share)]
         Xtest, Ytest = X[int(X.shape[0] * val_share):], Y[int(X.shape[0] * val_share):]
@@ -69,7 +69,7 @@ def create_X_Y(ts: np.array, lag=1, n_ahead=1, target_index=0) -> tuple:
     X, Y = [], []
     if len(ts)+1 - lag -n_ahead >= 0:
         for i in range(len(ts)+1 - lag - n_ahead):
-            Y.append(ts[(i + lag):(i + lag + n_ahead), target_index])
+            Y.append([ts[(i + lag):(i + lag + n_ahead), target_index][n_ahead-1]])
             X.append(ts[i:(i + lag)])
 
     X, Y = np.array(X), np.array(Y)
