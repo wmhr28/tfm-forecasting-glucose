@@ -76,10 +76,11 @@ def modelLSTM_Gen_Bidirectional_nodrop(dim1,dim2):
     model.compile(optimizer = Adam(learning_rate=0.001), loss='mse', metrics=['mae','mse'])
     return model
 
-def transferLearning_NewModel(base_model,lastLayer,includeDropout):
+def transferLearning_NewModel(base_model,lastLayer,includeDropout,includeDense):
     base_model.trainable = False 
     x = base_model.layers[lastLayer].output 
-    x = Dense(32, activation='relu',name='newLayer')(x)
+    if(includeDense):
+        x = Dense(32, activation='relu',name='newLayer')(x)
     if(includeDropout):
         x = Dropout(0.2,name='newDropout')(x) 
     
